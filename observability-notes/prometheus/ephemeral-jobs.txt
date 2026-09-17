@@ -1,0 +1,26 @@
+While learning more about Prometheus monitoring, I came across an interesting challenge: **How do you monitor ephemeral jobs?**
+
+Prometheus follows a **pull-based model** — it periodically reaches out to a target and scrapes its `/metrics` endpoint.
+
+That works well for long-running applications.
+
+But consider a Kubernetes Job that runs for only **5 seconds**, while Prometheus scrapes every **15 seconds**.
+
+The timeline could look like this:
+
+Job starts → runs for 5s → completes ❌
+Prometheus scrape happens at 15s → the pod is already gone.
+
+So the problem isn't that Prometheus *can't* scrape ephemeral workloads.
+
+The problem is that **the workload must still be alive and discoverable when the scrape happens**.
+
+For longer-running jobs, normal Prometheus scraping with Kubernetes service discovery can work perfectly well.
+
+For very short-lived batch jobs, we may need a different approach, such as **Prometheus Pushgateway**, where the job pushes its metrics before terminating and Prometheus later scrapes those metrics from the Pushgateway.
+
+A simple concept, but an important distinction:
+
+**Pull-based monitoring works only when the target is available when the pull happens.**
+
+#Prometheus #Kubernetes #DevOps #Observability #Monitoring #SRE
